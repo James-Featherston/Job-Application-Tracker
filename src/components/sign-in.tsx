@@ -1,45 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import Link from "next/link";
 
 export function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const { signIn, loading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
-    setMessage("");
 
     try {
-      const response = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Sign in failed");
-      } else {
-        setMessage("Signed in successfully!");
-        console.log("User:", data.user);
-        console.log("Session:", data.session);
-        // Clear form
-        setEmail("");
-        setPassword("");
-      }
-    } catch (err) {
-      setError("An unexpected error occurred");
-    } finally {
-      setLoading(false);
+      await signIn(email, password);
+      // Clear form on success
+      setEmail("");
+      setPassword("");
+    } catch (err: any) {
+      setError(err.message || "Sign in failed");
     }
   };
 
@@ -91,11 +72,14 @@ export function SignIn() {
         <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>
       )}
 
-      {message && (
-        <div className="mt-4 p-3 bg-green-100 text-green-700 rounded">
-          {message}
-        </div>
-      )}
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600">
+          Don't have an account?{" "}
+          <Link href="/sign-up" className="text-blue-600 hover:underline">
+            Sign Up
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
