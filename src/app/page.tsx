@@ -1,11 +1,19 @@
 "use client";
 
 import { SignIn } from "@/components/sign-in";
-import { UserProfile } from "@/components/user-profile";
 import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
   const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -15,12 +23,21 @@ export default function Home() {
     );
   }
 
+  if (user) {
+    return null; // Will redirect
+  }
+
   return (
     <main>
-      <h1 className="text-3xl font-bold text-center mt-8">
-        Application Tracker
-      </h1>
-      {user ? <UserProfile /> : <SignIn />}
+      <div className="max-w-4xl mx-auto px-4 py-16">
+        <h1 className="text-4xl font-bold text-center mb-4">
+          Application Tracker
+        </h1>
+        <p className="text-center text-gray-600 mb-8">
+          Track and manage your job applications in one place
+        </p>
+        <SignIn />
+      </div>
     </main>
   );
 }
